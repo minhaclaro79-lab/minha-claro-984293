@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pagamento da Fatura Claro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #e60000;
+      --primary-dark: #c40000;
+      --secondary: #333333;
+      --light-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #333333;
+      --text-light: #6c757d;
+      --success: #28a745;
+      --border: #dee2e6;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: 2rem;
+    }
+    
+    .header {
+      background: var(--primary);
+      padding: 1.2rem 1rem;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header img {
+      max-width: 180px;
+      height: auto;
+    }
+    
+    .container {
+      max-width: 650px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1.2rem 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .card-body {
+      padding: 1.8rem;
+    }
+    
+    .info-box {
+      display: flex;
+      justify-content: space-between;
+      background-color: rgba(230, 0, 0, 0.05);
+      border-left: 4px solid var(--primary);
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .pix-section {
+      background-color: var(--light-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .pix-code-container {
+      position: relative;
+      margin-bottom: 1.2rem;
+    }
+    
+    .pix-code {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.2rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      color: var(--text);
+      user-select: all;
+      word-break: break-word;
+      line-height: 1.6;
+      transition: all 0.2s ease;
+    }
+    
+    .pix-code.copied {
+      border-color: var(--success);
+      background-color: rgba(40, 167, 69, 0.05);
+    }
+    
+    .copy-button {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      transition: all 0.2s ease;
+      margin-bottom: 1.5rem;
+    }
+    
+    .copy-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(230, 0, 0, 0.2);
+    }
+    
+    .copy-button:active {
+      transform: translateY(0);
+    }
+    
+    .qr-container {
+      text-align: center;
+      padding: 1.5rem;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      margin: 1.5rem 0;
+    }
+    
+    .qr-code {
+      max-width: 220px;
+      margin: 0 auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+    }
+    
+    .qr-code img {
+      width: 100%;
+      height: auto;
+    }
+    
+    .instructions {
+      margin-top: 2rem;
+    }
+    
+    .steps {
+      list-style: none;
+      counter-reset: step-counter;
+    }
+    
+    .steps li {
+      padding: 1rem 0 1rem 3rem;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .steps li:last-child {
+      border-bottom: none;
+    }
+    
+    .steps li::before {
+      counter-increment: step-counter;
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2rem;
+      height: 2rem;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    .footer-note {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: var(--light-bg);
+      border-radius: var(--radius);
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background-color: var(--success);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    @media (max-width: 576px) {
+      .container {
+        padding: 0 1rem;
+      }
+      
+      .card-body {
+        padding: 1.2rem;
+      }
+      
+      .value {
+        font-size: 1.2rem;
+      }
+      
+      .pix-code {
+        font-size: 0.8rem;
+        padding: 1rem;
+      }
+    }
+    
+    @media print {
+      .copy-button, .toast {
+        display: none !important;
+      }
+      
+      .card {
+        box-shadow: none;
+        border: 1px solid var(--border);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="https://www.claro.com.br/static/email/202105/06140001/images/logo-cabecalho.png" alt="Logo Claro">
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-credit-card"></i> Pagamento via PIX
+      </div>
+      
+      <div class="card-body">
+        <div class="info-box">
+          <div>
+            <strong>Valor da Fatura</strong>
+            <p>Em atraso</p>
+          </div>
+          <div class="value">R$ 119,00</div>
+        </div>
+        
+        <div class="pix-section">
+          <div class="section-title">
+            <i class="fas fa-key"></i> Chave PIX para pagamento
+          </div>
+          
+          <div class="pix-code-container">
+            <div class="pix-code" id="pix">
+              <span id="chave-pix">
+                00020101021226830014BR.GOV.BCB.PIX2561qrcodespix.sejaefi.com.br/v2/61ef104ec46e4b18a7737b8d611956c55204000053039865802BR5905EFISA6008SAOPAULO62070503***6304A1D3
+              </span>
+            </div>
+          </div>
+
+          <button class="copy-button" onclick="copiarPix()">
+            <i class="fas fa-copy"></i> Copiar chave PIX
+          </button>
+        </div>
+        
+        <div class="qr-container">
+          <div class="section-title">
+            <i class="fas fa-qrcode"></i> Ou escaneie o QR Code
+          </div>
+          <div class="qr-code">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=00020101021226830014BR.GOV.BCB.PIX2561qrcodespix.sejaefi.com.br/v2/61ef104ec46e4b18a7737b8d611956c55204000053039865802BR5905EFISA6008SAOPAULO62070503***6304A1D3" alt="QR Code PIX">
+          </div>
+        </div>
+        
+        <div class="instructions">
+          <div class="section-title">
+            <i class="fas fa-info-circle"></i> Como pagar com PIX
+          </div>
+          
+          <ol class="steps">
+            <li>Copie a chave PIX acima ou escaneie o QR Code</li>
+            <li>Acesse o aplicativo do seu banco ou instituição financeira</li>
+            <li>Escolha a opção de pagamento via PIX Copia e Cola</li>
+            <li>Cole a chave copiada no campo solicitado</li>
+            <li>Confirme os dados e realize o pagamento</li>
+          </ol>
+        </div>
+        
+        <div class="footer-note">
+          <p><i class="fas fa-clock"></i> Após o pagamento, a compensação poderá levar até 30 minutos. Guarde o comprovante.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Chave PIX copiada com sucesso!</div>
+
+  <script>
+    function copiarPix() {
+      const texto = document.getElementById("chave-pix").innerText.replace(/\s+/g, '');
+      navigator.clipboard.writeText(texto).then(function() {
+        // Mostrar toast de sucesso
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        
+        // Adicionar efeito visual no campo de código
+        const pixCode = document.getElementById('pix');
+        pixCode.classList.add('copied');
+        
+        setTimeout(function() {
+          toast.classList.remove('show');
+          pixCode.classList.remove('copied');
+        }, 3000);
+      }, function() {
+        alert("Erro ao copiar a chave PIX. Por favor, selecione e copie manualmente.");
+      });
+    }
+  </script>
+
+</body>
+</html>
